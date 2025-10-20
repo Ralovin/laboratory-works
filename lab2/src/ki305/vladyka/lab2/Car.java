@@ -1,146 +1,178 @@
 package ki305.vladyka.lab2;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-
 /**
- * Клас представляє автомобіль з зовнішнім виглядом, характеристиками та функціями.
+ * Клас Car представляє автомобіль з двигуном, дверима та фарами.
+ * Дозволяє керувати основними компонентами автомобіля.
+ * Всі дії логуються у файл log.txt.
  */
-
 public class Car {
-    private Appearance carAppearance;
-    private Specifications carSpecifications;
-    private Features carFeatures;
+    private final Engine engine;
+    private final Doors doors;
+    private final Lights lights;
+    private boolean locked;
 
-    private void logToFile(String message) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter("Laba2.txt", true))) {
-            writer.println(message);
-        } catch (IOException e) {
-            System.err.println("Помилка запису в файл протоколу: " + e.getMessage());
+    public Car(Engine engine, Doors doors, Lights lights) {
+        this.engine = (engine != null) ? engine : Engine.of();
+        this.doors = (doors != null) ? doors : Doors.of();
+        this.lights = (lights != null) ? lights : Lights.of();
+    }
+
+    private boolean denyIfLocked(String action) {
+        if (locked) {
+            String msg = " Неможливо " + action + " — машина замкнена.";
+            System.out.println(msg);
+            Logger.log(msg);
+            return true;
+        }
+        return false;
+    }
+
+    /** Заводить двигун, якщо двері зачинені */
+    public void startEngine() {
+        if (doors.areOpen()) {
+            String msg = " Неможливо завести — дверi вiдчиненi.";
+            System.out.println(msg);
+            Logger.log(msg);
+            return;
+        }
+        if (engine.isRunning()) {
+            String msg = " Двигун вже працює.";
+            System.out.println(msg);
+            Logger.log(msg);
+        } else {
+            engine.start();
+            String msg = " Двигун заведено.";
+            System.out.println(msg);
+            Logger.log(msg);
         }
     }
 
-    /**
-     * Конструктор без параметрів.
-     */
-
-    public Car() {
-        carAppearance = new Appearance("Unspecified", "Unspecified", false);
-        carSpecifications = new Specifications(0.0, 0, "Unspecified");
-        carFeatures = new Features(false, false, 0);
-        logToFile("Об'єкт Car створено з використанням конструктора за замовчуванням.");
+    /** Зупиняє двигун */
+    public void stopEngine() {
+        if (!engine.isRunning()) {
+            String msg = " Двигун вже вимкнений.";
+            System.out.println(msg);
+            Logger.log(msg);
+        } else {
+            engine.stop();
+            String msg = " Двигун зупинено.";
+            System.out.println(msg);
+            Logger.log(msg);
+        }
     }
 
-    /**
-     * Конструктор з параметрами.
-     * @param carAppearance Зовнішній вигляд
-     * @param carSpecifications Характеристики
-     * @param carFeatures Функції
-     */
-
-    public Car(Appearance carAppearance, Specifications carSpecifications, Features carFeatures) {
-        this.carAppearance = carAppearance;
-        this.carSpecifications = carSpecifications;
-        this.carFeatures = carFeatures;
-        logToFile("Об'єкт Car створено з використанням користувацького конструктора.");
+    /** Відкриває двері, якщо машина не замкнена */
+    public void openDoors() {
+        if (denyIfLocked("вiдкрити дверi")) return;
+        if (doors.areOpen()) {
+            String msg = " Дверi вже вiдкритi.";
+            System.out.println(msg);
+            Logger.log(msg);
+        } else {
+            doors.open();
+            String msg = " Дверi вiдкрито.";
+            System.out.println(msg);
+            Logger.log(msg);
+        }
     }
 
-    /**
-     * Повертає зовнішній вигляд.
-     * @return Об'єкт Appearance
-     */
-
-    public Appearance getCarAppearance() {
-        logToFile("Викликано метод getCarAppearance.");
-        return carAppearance;
+    /** Закриває двері */
+    public void closeDoors() {
+        if (!doors.areOpen()) {
+            String msg = " Дверi вже зачиненi.";
+            System.out.println(msg);
+            Logger.log(msg);
+        } else {
+            doors.close();
+            String msg = " Дверi зачинено.";
+            System.out.println(msg);
+            Logger.log(msg);
+        }
     }
 
-    /**
-     * Повертає характеристики.
-     * @return Об'єкт Specifications
-     */
-
-    public Specifications getCarSpecifications() {
-        logToFile("Викликано метод getCarSpecifications.");
-        return carSpecifications;
+    /** Увімкнення фар */
+    public void turnOnLights() {
+        if (lights.areOn()) {
+            String msg = " Фари вже увiмкненi.";
+            System.out.println(msg);
+            Logger.log(msg);
+        } else {
+            lights.turnOn();
+            String msg = " Фари увiмкнено.";
+            System.out.println(msg);
+            Logger.log(msg);
+        }
     }
 
-     /**
-     * Повертає функції.
-     * @return Об'єкт Features
-     */
-    public Features getCarFeatures() {
-        logToFile("Викликано метод getCarFeatures.");
-        return carFeatures;
+    /** Вимкнення фар */
+    public void turnOffLights() {
+        if (!lights.areOn()) {
+            String msg = " Фари вже вимкненi.";
+            System.out.println(msg);
+            Logger.log(msg);
+        } else {
+            lights.turnOff();
+            String msg = " Фари вимкнено.";
+            System.out.println(msg);
+            Logger.log(msg);
+        }
     }
-    /**
-     * Встановлює новий зовнішній вигляд.
-     * @param carAppearance Новий зовнішній вигляд
-     */
 
-    public void setCarAppearance(Appearance carAppearance) {
-        logToFile("Викликано метод setCarAppearance. Встановлено новий зовнiшнiй вигляд.");
-        this.carAppearance = carAppearance;
+    /** Сигналить */
+    public void honk() {
+        String msg = " Бi-бiп!";
+        System.out.println(msg);
+        Logger.log("Сигнал: " + msg);
     }
-    /**
-     * Встановлює нові характеристики.
-     * @param carSpecifications Нові характеристики
-     */
 
-    public void setCarSpecifications(Specifications carSpecifications) {
-        logToFile("Викликано метод setCarSpecifications. Встановлено новi характеристики.");
-        this.carSpecifications = carSpecifications;
+    /** Замикання машини */
+    public void lock() {
+        if (engine.isRunning()) {
+            String msg = " Неможливо замкнути — двигун працює.";
+            System.out.println(msg);
+            Logger.log(msg);
+            return;
+        }
+        if (doors.areOpen()) {
+            doors.close();
+            System.out.println(" Дверi зачинено.");
+            Logger.log(" Дверi автоматично зачинено перед замиканням.");
+        }
+        if (locked) {
+            String msg = " Машина вже замкнена.";
+            System.out.println(msg);
+            Logger.log(msg);
+        } else {
+            locked = true;
+            String msg = " Машину замкнено.";
+            System.out.println(msg);
+            Logger.log(msg);
+        }
     }
-    /**
-     * Встановлює нові функції.
-     * @param carFeatures Нові функції
-     */
 
-    public void setCarFeatures(Features carFeatures) {
-        logToFile("Викликано метод setCarFeatures. Встановлено новi функцiї.");
-        this.carFeatures = carFeatures;
+    /** Відмикання машини */
+    public void unlock() {
+        if (!locked) {
+            String msg = " Машина вже вiдкрита.";
+            System.out.println(msg);
+            Logger.log(msg);
+        } else {
+            locked = false;
+            String msg = " Машину вiдiмкнено.";
+            System.out.println(msg);
+            Logger.log(msg);
+        }
     }
-    /**
-     * Змінює колір авто.
-     * @param newColor Новий колір
-     */
 
-    public void changeColor(String newColor) {
-        logToFile("Змiна кольору автомобiля з '" + carAppearance.getColor() + "' на '" + newColor + "'.");
-        carAppearance.setColor(newColor);
-    }
-    /**
-     * Змінює тип трансмісії.
-     * @param newTransmission Новий тип
-     */
-
-    public void changeTransmissionType(String newTransmission) {
-        logToFile("Змiна типу трансмiсiї з '" + carSpecifications.getTransmissionType() + "' на '" + newTransmission + "'.");
-        carSpecifications.setTransmissionType(newTransmission);
-    }
-    /**
-     * Виводить інформацію про авто.
-     */
-
-    public void displayCarInfo() {
-        logToFile("Викликано метод displayCarInfo. Виведення iнформацiї про автомобiль.");
-        System.out.println("--- Вiдображення iнформацiї про автомобiль ---");
-        System.out.println("Колiр: " + carAppearance.getColor());
-        System.out.println("Тип кузова: " + carAppearance.getBodyType());
-        System.out.println("Люк: " + (carAppearance.getHasSunroof() ? "Так" : "Ні"));
-        System.out.println("Об'єм двигуна: " + carSpecifications.getEngineSize() + "л");
-        System.out.println("Кiнськi сили: " + carSpecifications.getHorsepower() + " к.с.");
-        System.out.println("Трансмiсiя: " + carSpecifications.getTransmissionType());
-        System.out.println("GPS: " + (carFeatures.getHasGPS() ? "Так" : "Ні"));
-        System.out.println("Пiдiгрiв сидiнь: " + (carFeatures.getHasHeatedSeats() ? "Так" : "Нi"));
-        System.out.println("Кiлькiсть динамiкiв: " + carFeatures.getNumberOfSpeakers());
-        System.out.println("--------------------------------");
-    }
-    /**
-     * Виводить інформацію про наявність GPS.
-     */
-    public void hasGPS() {
-        logToFile("Викликано метод hasGPS. Результат: " + carFeatures.getHasGPS());
+    /** Виводить поточний стан авто */
+    public void displayStatus() {
+        String status = "\n=== Стан автомобiля ===\n" +
+                " Двигун: " + (engine.isRunning() ? "Працює" : "Вимкнений") + "\n" +
+                " Дверi: " + (doors.areOpen() ? "Вiдкритi" : "Закритi") + "\n" +
+                " Фари: " + (lights.areOn() ? "Увiмкненi" : "Вимкненi") + "\n" +
+                " Замок: " + (locked ? "Замкнено" : "Вiдкрито") + "\n" +
+                "========================\n";
+        System.out.println(status);
+        Logger.log("Перевірка стану авто:\n" + status);
     }
 }
